@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Chat en Streaming con OpenRouter</title>
+</head>
+<body>
+    <h1>Chat en Streaming con OpenRouter</h1>
+    <input id="userInput" type="text" placeholder="Escribe tu mensaje">
+    <button onclick="sendMessage()">Enviar</button>
+    <div id="response"></div>
+
+    <script>
+        async function sendMessage() {
+            const message = document.getElementById('userInput').value;
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = ""; // Limpia la respuesta anterior
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                responseDiv.innerHTML += decoder.decode(value, { stream: true });
+            }
+        }
+    </script>
+</body>
+</html>
